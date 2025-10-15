@@ -1,0 +1,110 @@
+{% extends 'api_clinica/base.html' %}
+
+{% block title %}Recetas Médicas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold" style="color: #001f3f;">Listado de Recetas Médicas</h2>
+    <a href="{% url 'web_receta_medica_create' %}" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> Crear Nueva Receta
+    </a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-center">
+            <div class="col-md-4">
+                <input type="text" name="q" class="form-control" placeholder="Buscar por dosis o frecuencia..." value="{{ query|default_if_none:'' }}">
+            </div>
+            <div class="col-md-3">
+                <select name="tratamiento" class="form-select">
+                    <option value="">Todos los Tratamientos</option>
+                    {% for tratamiento_opt in tratamientos %}
+                        <option value="{{ tratamiento_opt.id }}" {% if tratamiento_opt.id|stringformat:"i" == selected_tratamiento %}selected{% endif %}>
+                            Tratamiento #{{ tratamiento_opt.id }} ({{ tratamiento_opt.descripcion|truncatechars:30 }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="medicamento" class="form-select">
+                    <option value="">Todos los Medicamentos</option>
+                    {% for medicamento_opt in medicamentos %}
+                        <option value="{{ medicamento_opt.id }}" {% if medicamento_opt.id|stringformat:"i" == selected_medicamento %}selected{% endif %}>
+                            {{ medicamento_opt.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary-custom w-100">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+            <div class="col-md-1">
+                <a href="{% url 'web_receta_medica_list' %}" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if recetas %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tratamiento</th>
+                <th>Medicamento</th>
+                <th>Dosis</th>
+                <th>Frecuencia</th>
+                <th>Duración</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for receta in recetas %}
+            <tr>
+                <td>{{ receta.id }}</td>
+                <td>
+                    {% if receta.tratamiento %}
+                        <a href="{% url 'web_tratamiento_update' receta.tratamiento.pk %}" class="text-decoration-none">
+                            #{{ receta.tratamiento.id }} ({{ receta.tratamiento.descripcion|truncatechars:30 }})
+                        </a>
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>
+                    {% if receta.medicamento %}
+                        <a href="{% url 'web_medicamento_update' receta.medicamento.pk %}" class="text-decoration-none">
+                            {{ receta.medicamento.nombre }}
+                        </a>
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>{{ receta.dosis }}</td>
+                <td>{{ receta.frecuencia }}</td>
+                <td>{{ receta.duracion }}</td>
+                <td class="text-center">
+                    <a href="{% url 'web_receta_medica_update' receta.pk %}" class="btn btn-info btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                    <a href="{% url 'web_receta_medica_delete' receta.pk %}" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-warning text-center" role="alert">
+    No se encontraron recetas médicas. <a href="{% url 'web_receta_medica_create' %}" class="alert-link">Crea una ahora</a>.
+</div>
+{% endif %}
+{% endblock %}

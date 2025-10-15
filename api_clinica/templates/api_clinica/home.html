@@ -1,0 +1,37 @@
+{% extends 'api_clinica/base.html' %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12 text-center py-5">
+        <h1 class="display-4 fw-bold" style="color: #001f3f;">Bienvenido al Sistema de Gestión de Clínica</h1>
+        <p class="lead mt-4">
+            Utiliza el menú de navegación superior para acceder y gestionar las diferentes secciones:
+            Especialidades, Médicos, Pacientes, Consultas Médicas, Tratamientos, Medicamentos y Recetas Médicas.
+        </p>
+        <p class="lead">
+            Este sistema te permite realizar operaciones CRUD (Crear, Leer, Actualizar, Eliminar)
+            y aplicar filtros y búsquedas en tus datos.
+        </p>
+        <hr class="my-5" style="border-color: #001f3f; opacity: 0.5;">
+        <div class="row justify-content-center">
+            <div class="col-md-3 mb-3">
+                <a href="{% url 'web_medico_list' %}" class="btn btn-primary-custom btn-lg w-100">
+                    <i class="bi bi-person-badge"></i> Gestionar Médicos
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{% url 'web_paciente_list' %}" class="btn btn-primary-custom btn-lg w-100">
+                    <i class="bi bi-person"></i> Gestionar Pacientes
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{% url 'web_consulta_medica_list' %}" class="btn btn-primary-custom btn-lg w-100">
+                    <i class="bi bi-calendar-check"></i> Gestionar Consultas
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

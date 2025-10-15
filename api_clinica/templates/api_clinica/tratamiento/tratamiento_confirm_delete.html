@@ -1,0 +1,28 @@
+{% extends 'api_clinica/base.html' %}
+
+{% block title %}Eliminar Tratamiento{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-danger">Eliminar Tratamiento</h2>
+    <a href="{% url 'web_tratamiento_list' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left-circle"></i> Volver a la Lista
+    </a>
+</div>
+
+<div class="alert alert-danger" role="alert">
+    <h4 class="alert-heading">¡Atención! Estás a punto de eliminar un tratamiento.</h4>
+    <p>¿Estás seguro que deseas eliminar el tratamiento con descripción "<strong>{{ tratamiento.descripcion|truncatechars:100 }}</strong>" para la consulta #<strong>{{ tratamiento.consulta.id }}</strong>?</p>
+    <p>Esta acción no se puede deshacer.</p>
+    <hr>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger me-2">
+            <i class="bi bi-trash"></i> Confirmar Eliminación
+        </button>
+        <a href="{% url 'web_tratamiento_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-x-circle"></i> Cancelar
+        </a>
+    </form>
+</div>
+{% endblock %}

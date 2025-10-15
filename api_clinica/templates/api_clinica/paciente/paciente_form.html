@@ -1,0 +1,35 @@
+{% extends 'api_clinica/base.html' %}
+
+{% block title %}{{ action }} Paciente{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold" style="color: #001f3f;">{{ action }} Paciente</h2>
+    <a href="{% url 'web_paciente_list' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left-circle"></i> Volver a la Lista
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="mb-3">
+                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text }}</div>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="alert alert-danger mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary-custom">
+                <i class="bi bi-save"></i> Guardar
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

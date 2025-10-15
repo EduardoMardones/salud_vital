@@ -1,0 +1,101 @@
+{% extends 'api_clinica/base.html' %}
+
+{% block title %}Médicos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold" style="color: #001f3f;">Listado de Médicos</h2>
+    <a href="{% url 'web_medico_create' %}" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> Crear Nuevo Médico
+    </a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-center">
+            <div class="col-md-5">
+                <input type="text" name="q" class="form-control" placeholder="Buscar por nombre, apellido, RUT, correo..." value="{{ query|default_if_none:'' }}">
+            </div>
+            <div class="col-md-3">
+                <select name="especialidad" class="form-select">
+                    <option value="">Todas las Especialidades</option>
+                    {% for especialidad in especialidades %}
+                        <option value="{{ especialidad.id }}" {% if especialidad.id|stringformat:"i" == selected_especialidad %}selected{% endif %}>
+                            {{ especialidad.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="activo" class="form-select">
+                    <option value="">Estado Activo</option>
+                    <option value="true" {% if selected_activo == 'true' %}selected{% endif %}>Activo</option>
+                    <option value="false" {% if selected_activo == 'false' %}selected{% endif %}>Inactivo</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary-custom w-100">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+            <div class="col-md-1">
+                <a href="{% url 'web_medico_list' %}" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if medicos %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>RUT</th>
+                <th>Correo</th>
+                <th>Teléfono</th>
+                <th>Especialidad</th>
+                <th>Activo</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for medico in medicos %}
+            <tr>
+                <td>{{ medico.id }}</td>
+                <td>{{ medico.nombre }}</td>
+                <td>{{ medico.apellido }}</td>
+                <td>{{ medico.rut }}</td>
+                <td>{{ medico.correo }}</td>
+                <td>{{ medico.telefono|default:"N/A" }}</td>
+                <td>{{ medico.especialidad.nombre|default:"Sin Especialidad" }}</td>
+                <td>
+                    {% if medico.activo %}
+                        <span class="badge bg-success">Sí</span>
+                    {% else %}
+                        <span class="badge bg-danger">No</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    <a href="{% url 'web_medico_update' medico.pk %}" class="btn btn-info btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                    <a href="{% url 'web_medico_delete' medico.pk %}" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-warning text-center" role="alert">
+    No se encontraron médicos. <a href="{% url 'web_medico_create' %}" class="alert-link">Crea uno ahora</a>.
+</div>
+{% endif %}
+{% endblock %}

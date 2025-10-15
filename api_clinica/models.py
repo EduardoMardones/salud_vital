@@ -16,7 +16,7 @@ class Medico(models.Model):
     activo = models.BooleanField(default=True)
     especialidad = models.ForeignKey(Especialidad, on_delete=models.SET_NULL, null=True, related_name='medicos')
 
-    def __str__(self):
+    def get__full__name(self):
         return f'{self.nombre} {self.apellido}'
 
 class Paciente(models.Model):
@@ -41,7 +41,7 @@ class Paciente(models.Model):
     direccion = models.CharField(max_length=255, blank=True, null=True)
     activo = models.BooleanField(default=True)
 
-    def __str__(self):
+    def get__full__name(self):
         return f'{self.nombre} {self.apellido}'
 
 class ConsultaMedica(models.Model):

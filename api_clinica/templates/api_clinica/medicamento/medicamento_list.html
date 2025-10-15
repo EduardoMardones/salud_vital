@@ -1,0 +1,82 @@
+{% extends 'api_clinica/base.html' %}
+
+{% block title %}Medicamentos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold" style="color: #001f3f;">Listado de Medicamentos</h2>
+    <a href="{% url 'web_medicamento_create' %}" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> Crear Nuevo Medicamento
+    </a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-center">
+            <div class="col-md-5">
+                <input type="text" name="q" class="form-control" placeholder="Buscar por nombre..." value="{{ query|default_if_none:'' }}">
+            </div>
+            <div class="col-md-5">
+                <select name="laboratorio" class="form-select">
+                    <option value="">Todos los Laboratorios</option>
+                    {% for lab in laboratorios_unicos %}
+                        <option value="{{ lab }}" {% if lab == selected_laboratorio %}selected{% endif %}>
+                            {{ lab }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary-custom w-100">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+            <div class="col-md-1">
+                <a href="{% url 'web_medicamento_list' %}" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if medicamentos %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Laboratorio</th>
+                <th>Stock</th>
+                <th>Precio Unitario</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for medicamento in medicamentos %}
+            <tr>
+                <td>{{ medicamento.id }}</td>
+                <td>{{ medicamento.nombre }}</td>
+                <td>{{ medicamento.laboratorio }}</td>
+                <td>{{ medicamento.stock }}</td>
+                <td>${{ medicamento.precio_unitario|floatformat:2 }}</td>
+                <td class="text-center">
+                    <a href="{% url 'web_medicamento_update' medicamento.pk %}" class="btn btn-info btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                    <a href="{% url 'web_medicamento_delete' medicamento.pk %}" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-warning text-center" role="alert">
+    No se encontraron medicamentos. <a href="{% url 'web_medicamento_create' %}" class="alert-link">Crea uno ahora</a>.
+</div>
+{% endif %}
+{% endblock %}
