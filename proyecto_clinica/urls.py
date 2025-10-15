@@ -17,9 +17,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 urlpatterns = [
     path('admin/', admin.site.urls), # URL para el panel de administración de Django
     path('api/', include('api_clinica.urls')), # Incluye las URLs de la aplicación api_clinica bajo el prefijo /api/
     path('', include('api_clinica.urls')), # Incluye las URLs de la aplicación api_clinica directamente en la raíz para las vistas web.
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    # Opcional: interfaz de usuario de Swagger
+    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    # Opcional: interfaz de usuario de ReDoc
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
