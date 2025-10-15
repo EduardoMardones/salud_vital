@@ -1,13 +1,16 @@
-# api_clinica/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import Q # Para filtros y búsquedas
 from rest_framework import generics # Para las vistas de la API REST
-from .models import Especialidad, Medico, Paciente, ConsultaMedica, Tratamiento, Medicamento, RecetaMedica
+
+# Importar todos los modelos, incluyendo Enfermera
+from .models import Especialidad, Medico, Paciente, ConsultaMedica, Tratamiento, Medicamento, RecetaMedica, Enfermera
+# Importar todos los serializadores, incluyendo EnfermeraSerializer
 from .serializers import EspecialidadSerializer, MedicoSerializer, PacienteSerializer, ConsultaMedicaSerializer, \
-    TratamientoSerializer, MedicamentoSerializer, RecetaMedicaSerializer
+    TratamientoSerializer, MedicamentoSerializer, RecetaMedicaSerializer, EnfermeraSerializer
+# Importar todos los formularios, incluyendo EnfermeraForm (¡recuerda crear este!)
 from .forms import EspecialidadForm, MedicoForm, PacienteForm, ConsultaMedicaForm, TratamientoForm, \
-    MedicamentoForm, RecetaMedicaForm
+    MedicamentoForm, RecetaMedicaForm, EnfermeraForm
 
 """
     Este archivo contiene todas las vistas para la aplicación 'api_clinica'.
@@ -163,6 +166,31 @@ class RecetaMedicaRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = RecetaMedica.objects.all()
     serializer_class = RecetaMedicaSerializer
 
+# --- NUEVAS VISTAS PARA EL MODELO ENFERMERA (API RESTful) ---
+class EnfermeraListCreate(generics.ListCreateAPIView):
+    """
+        API para listar todas las enfermeras o crear una nueva.
+        Permite filtrar enfermeras por medico_a_cargo_id.
+    """
+    queryset = Enfermera.objects.all()
+    serializer_class = EnfermeraSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        medico_id = self.request.query_params.get('medico_a_cargo', None)
+        if medico_id:
+            queryset = queryset.filter(medico_a_cargo__id=medico_id)
+        return queryset
+
+class EnfermeraRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    """
+        API para recuperar, actualizar o eliminar una enfermera específica por su ID.
+    """
+    queryset = Enfermera.objects.all()
+    serializer_class = EnfermeraSerializer
+# -----------------------------------------------------------
+
+
 # Vistas basadas en plantillas (HTML, CSS, Bootstrap)
 # ======================================================================================================================
 
@@ -173,13 +201,9 @@ def home(request):
     """
     return render(request, 'api_clinica/home.html')
 
-# Vistas CRUD para Especialidad
+# Vistas CRUD para Especialidad (sin cambios)
 def especialidad_list(request):
-    """
-        Lista todas las especialidades y permite buscar por nombre o descripción.
-        Muestra los resultados en una tabla.
-    """
-    query = request.GET.get('q') # Obtiene el parámetro de búsqueda 'q' de la URL
+    query = request.GET.get('q')
     if query:
         especialidades = Especialidad.objects.filter(Q(nombre__icontains=query) | Q(descripcion__icontains=query))
     else:
@@ -187,10 +211,6 @@ def especialidad_list(request):
     return render(request, 'api_clinica/especialidad/especialidad_list.html', {'especialidades': especialidades, 'query': query})
 
 def especialidad_create(request):
-    """
-        Permite crear una nueva especialidad mediante un formulario.
-        Redirige a la lista de especialidades tras una creación exitosa.
-    """
     if request.method == 'POST':
         form = EspecialidadForm(request.POST)
         if form.is_valid():
@@ -202,10 +222,6 @@ def especialidad_create(request):
     return render(request, 'api_clinica/especialidad/especialidad_form.html', {'form': form, 'action': 'Crear'})
 
 def especialidad_update(request, pk):
-    """
-        Permite editar una especialidad existente.
-        Carga la especialidad por su PK y prellena el formulario.
-    """
     especialidad = get_object_or_404(Especialidad, pk=pk)
     if request.method == 'POST':
         form = EspecialidadForm(request.POST, instance=especialidad)
@@ -218,10 +234,6 @@ def especialidad_update(request, pk):
     return render(request, 'api_clinica/especialidad/especialidad_form.html', {'form': form, 'action': 'Editar'})
 
 def especialidad_delete(request, pk):
-    """
-        Elimina una especialidad específica por su PK.
-        Confirma la eliminación y redirige a la lista.
-    """
     especialidad = get_object_or_404(Especialidad, pk=pk)
     if request.method == 'POST':
         especialidad.delete()
@@ -229,16 +241,12 @@ def especialidad_delete(request, pk):
         return redirect('web_especialidad_list')
     return render(request, 'api_clinica/especialidad/especialidad_confirm_delete.html', {'especialidad': especialidad})
 
-# Vistas CRUD para Paciente
+# Vistas CRUD para Paciente (sin cambios)
 def paciente_list(request):
-    """
-        Lista todos los pacientes y permite buscar por nombre, apellido o RUT.
-        Permite filtrar por tipo de sangre y estado activo.
-    """
     pacientes = Paciente.objects.all()
     query = request.GET.get('q')
     tipo_sangre_filter = request.GET.get('tipo_sangre')
-    activo_filter = request.GET.get('activo') # 'true', 'false', o None
+    activo_filter = request.GET.get('activo')
 
     if query:
         pacientes = pacientes.filter(Q(nombre__icontains=query) | Q(apellido__icontains=query) | Q(rut__icontains=query))
@@ -249,7 +257,7 @@ def paciente_list(request):
     if activo_filter is not None:
         pacientes = pacientes.filter(activo=(activo_filter == 'true'))
 
-    tipo_sangre_choices = Paciente.TIPO_SANGRE_CHOICES # Para el filtro en la plantilla
+    tipo_sangre_choices = Paciente.TIPO_SANGRE_CHOICES
 
     return render(request, 'api_clinica/paciente/paciente_list.html', {
         'pacientes': pacientes,
@@ -260,9 +268,6 @@ def paciente_list(request):
     })
 
 def paciente_create(request):
-    """
-        Permite crear un nuevo paciente.
-    """
     if request.method == 'POST':
         form = PacienteForm(request.POST)
         if form.is_valid():
@@ -274,9 +279,6 @@ def paciente_create(request):
     return render(request, 'api_clinica/paciente/paciente_form.html', {'form': form, 'action': 'Crear'})
 
 def paciente_update(request, pk):
-    """
-        Permite editar un paciente existente.
-    """
     paciente = get_object_or_404(Paciente, pk=pk)
     if request.method == 'POST':
         form = PacienteForm(request.POST, instance=paciente)
@@ -289,9 +291,6 @@ def paciente_update(request, pk):
     return render(request, 'api_clinica/paciente/paciente_form.html', {'form': form, 'action': 'Editar'})
 
 def paciente_delete(request, pk):
-    """
-        Elimina un paciente.
-    """
     paciente = get_object_or_404(Paciente, pk=pk)
     if request.method == 'POST':
         paciente.delete()
@@ -299,12 +298,8 @@ def paciente_delete(request, pk):
         return redirect('web_paciente_list')
     return render(request, 'api_clinica/paciente/paciente_confirm_delete.html', {'paciente': paciente})
 
-# Vistas CRUD para Medico
+# Vistas CRUD para Medico (sin cambios)
 def medico_list(request):
-    """
-        Lista todos los médicos y permite buscar por nombre, apellido, RUT o correo.
-        Permite filtrar por especialidad y estado activo.
-    """
     medicos = Medico.objects.all()
     query = request.GET.get('q')
     especialidad_filter = request.GET.get('especialidad')
@@ -319,7 +314,7 @@ def medico_list(request):
     if activo_filter is not None:
         medicos = medicos.filter(activo=(activo_filter == 'true'))
 
-    especialidades = Especialidad.objects.all() # Para el filtro en la plantilla
+    especialidades = Especialidad.objects.all()
 
     return render(request, 'api_clinica/medico/medico_list.html', {
         'medicos': medicos,
@@ -330,9 +325,6 @@ def medico_list(request):
     })
 
 def medico_create(request):
-    """
-        Permite crear un nuevo médico.
-    """
     if request.method == 'POST':
         form = MedicoForm(request.POST)
         if form.is_valid():
@@ -344,9 +336,6 @@ def medico_create(request):
     return render(request, 'api_clinica/medico/medico_form.html', {'form': form, 'action': 'Crear'})
 
 def medico_update(request, pk):
-    """
-        Permite editar un médico existente.
-    """
     medico = get_object_or_404(Medico, pk=pk)
     if request.method == 'POST':
         form = MedicoForm(request.POST, instance=medico)
@@ -359,9 +348,6 @@ def medico_update(request, pk):
     return render(request, 'api_clinica/medico/medico_form.html', {'form': form, 'action': 'Editar'})
 
 def medico_delete(request, pk):
-    """
-        Elimina un médico.
-    """
     medico = get_object_or_404(Medico, pk=pk)
     if request.method == 'POST':
         medico.delete()
@@ -369,12 +355,8 @@ def medico_delete(request, pk):
         return redirect('web_medico_list')
     return render(request, 'api_clinica/medico/medico_confirm_delete.html', {'medico': medico})
 
-# Vistas CRUD para ConsultaMedica
+# Vistas CRUD para ConsultaMedica (sin cambios)
 def consulta_medica_list(request):
-    """
-        Lista todas las consultas médicas y permite buscar por motivo o diagnóstico.
-        Permite filtrar por paciente, médico y estado de la consulta.
-    """
     consultas = ConsultaMedica.objects.all()
     query = request.GET.get('q')
     paciente_filter = request.GET.get('paciente')
@@ -409,9 +391,6 @@ def consulta_medica_list(request):
     })
 
 def consulta_medica_create(request):
-    """
-        Permite crear una nueva consulta médica.
-    """
     if request.method == 'POST':
         form = ConsultaMedicaForm(request.POST)
         if form.is_valid():
@@ -423,9 +402,6 @@ def consulta_medica_create(request):
     return render(request, 'api_clinica/consulta_medica/consulta_medica_form.html', {'form': form, 'action': 'Crear'})
 
 def consulta_medica_update(request, pk):
-    """
-        Permite editar una consulta médica existente.
-    """
     consulta = get_object_or_404(ConsultaMedica, pk=pk)
     if request.method == 'POST':
         form = ConsultaMedicaForm(request.POST, instance=consulta)
@@ -438,9 +414,6 @@ def consulta_medica_update(request, pk):
     return render(request, 'api_clinica/consulta_medica/consulta_medica_form.html', {'form': form, 'action': 'Editar'})
 
 def consulta_medica_delete(request, pk):
-    """
-        Elimina una consulta médica.
-    """
     consulta = get_object_or_404(ConsultaMedica, pk=pk)
     if request.method == 'POST':
         consulta.delete()
@@ -448,12 +421,8 @@ def consulta_medica_delete(request, pk):
         return redirect('web_consulta_medica_list')
     return render(request, 'api_clinica/consulta_medica/consulta_medica_confirm_delete.html', {'consulta': consulta})
 
-# Vistas CRUD para Tratamiento
+# Vistas CRUD para Tratamiento (sin cambios)
 def tratamiento_list(request):
-    """
-        Lista todos los tratamientos y permite buscar por descripción u observaciones.
-        Permite filtrar por consulta médica.
-    """
     tratamientos = Tratamiento.objects.all()
     query = request.GET.get('q')
     consulta_filter = request.GET.get('consulta')
@@ -464,7 +433,7 @@ def tratamiento_list(request):
     if consulta_filter:
         tratamientos = tratamientos.filter(consulta__id=consulta_filter)
 
-    consultas = ConsultaMedica.objects.all() # Para el filtro en la plantilla
+    consultas = ConsultaMedica.objects.all()
 
     return render(request, 'api_clinica/tratamiento/tratamiento_list.html', {
         'tratamientos': tratamientos,
@@ -474,9 +443,6 @@ def tratamiento_list(request):
     })
 
 def tratamiento_create(request):
-    """
-        Permite crear un nuevo tratamiento.
-    """
     if request.method == 'POST':
         form = TratamientoForm(request.POST)
         if form.is_valid():
@@ -488,9 +454,6 @@ def tratamiento_create(request):
     return render(request, 'api_clinica/tratamiento/tratamiento_form.html', {'form': form, 'action': 'Crear'})
 
 def tratamiento_update(request, pk):
-    """
-        Permite editar un tratamiento existente.
-    """
     tratamiento = get_object_or_404(Tratamiento, pk=pk)
     if request.method == 'POST':
         form = TratamientoForm(request.POST, instance=tratamiento)
@@ -503,9 +466,6 @@ def tratamiento_update(request, pk):
     return render(request, 'api_clinica/tratamiento/tratamiento_form.html', {'form': form, 'action': 'Editar'})
 
 def tratamiento_delete(request, pk):
-    """
-        Elimina un tratamiento.
-    """
     tratamiento = get_object_or_404(Tratamiento, pk=pk)
     if request.method == 'POST':
         tratamiento.delete()
@@ -513,12 +473,8 @@ def tratamiento_delete(request, pk):
         return redirect('web_tratamiento_list')
     return render(request, 'api_clinica/tratamiento/tratamiento_confirm_delete.html', {'tratamiento': tratamiento})
 
-# Vistas CRUD para Medicamento
+# Vistas CRUD para Medicamento (sin cambios)
 def medicamento_list(request):
-    """
-        Lista todos los medicamentos y permite buscar por nombre o laboratorio.
-        Permite filtrar por laboratorio.
-    """
     medicamentos = Medicamento.objects.all()
     query = request.GET.get('q')
     laboratorio_filter = request.GET.get('laboratorio')
@@ -527,9 +483,8 @@ def medicamento_list(request):
         medicamentos = medicamentos.filter(Q(nombre__icontains=query) | Q(laboratorio__icontains=query))
     
     if laboratorio_filter:
-        medicamentos = medicamentos.filter(laboratorio__icontains=laboratorio_filter) # Filtrar por nombre de laboratorio
+        medicamentos = medicamentos.filter(laboratorio__icontains=laboratorio_filter)
 
-    # Obtener una lista de laboratorios únicos para el filtro
     laboratorios_unicos = Medicamento.objects.order_by().values_list('laboratorio', flat=True).distinct()
 
     return render(request, 'api_clinica/medicamento/medicamento_list.html', {
@@ -540,9 +495,6 @@ def medicamento_list(request):
     })
 
 def medicamento_create(request):
-    """
-        Permite crear un nuevo medicamento.
-    """
     if request.method == 'POST':
         form = MedicamentoForm(request.POST)
         if form.is_valid():
@@ -554,9 +506,6 @@ def medicamento_create(request):
     return render(request, 'api_clinica/medicamento/medicamento_form.html', {'form': form, 'action': 'Crear'})
 
 def medicamento_update(request, pk):
-    """
-        Permite editar un medicamento existente.
-    """
     medicamento = get_object_or_404(Medicamento, pk=pk)
     if request.method == 'POST':
         form = MedicamentoForm(request.POST, instance=medicamento)
@@ -569,9 +518,6 @@ def medicamento_update(request, pk):
     return render(request, 'api_clinica/medicamento/medicamento_form.html', {'form': form, 'action': 'Editar'})
 
 def medicamento_delete(request, pk):
-    """
-        Elimina un medicamento.
-    """
     medicamento = get_object_or_404(Medicamento, pk=pk)
     if request.method == 'POST':
         medicamento.delete()
@@ -579,12 +525,8 @@ def medicamento_delete(request, pk):
         return redirect('web_medicamento_list')
     return render(request, 'api_clinica/medicamento/medicamento_confirm_delete.html', {'medicamento': medicamento})
 
-# Vistas CRUD para RecetaMedica
+# Vistas CRUD para RecetaMedica (sin cambios)
 def receta_medica_list(request):
-    """
-        Lista todas las recetas médicas y permite buscar por dosis, frecuencia o duración.
-        Permite filtrar por tratamiento y medicamento.
-    """
     recetas = RecetaMedica.objects.all()
     query = request.GET.get('q')
     tratamiento_filter = request.GET.get('tratamiento')
@@ -612,9 +554,6 @@ def receta_medica_list(request):
     })
 
 def receta_medica_create(request):
-    """
-        Permite crear una nueva receta médica.
-    """
     if request.method == 'POST':
         form = RecetaMedicaForm(request.POST)
         if form.is_valid():
@@ -626,9 +565,6 @@ def receta_medica_create(request):
     return render(request, 'api_clinica/receta_medica/receta_medica_form.html', {'form': form, 'action': 'Crear'})
 
 def receta_medica_update(request, pk):
-    """
-        Permite editar una receta médica existente.
-    """
     receta = get_object_or_404(RecetaMedica, pk=pk)
     if request.method == 'POST':
         form = RecetaMedicaForm(request.POST, instance=receta)
@@ -641,12 +577,81 @@ def receta_medica_update(request, pk):
     return render(request, 'api_clinica/receta_medica/receta_medica_form.html', {'form': form, 'action': 'Editar'})
 
 def receta_medica_delete(request, pk):
-    """
-        Elimina una receta médica.
-    """
     receta = get_object_or_404(RecetaMedica, pk=pk)
     if request.method == 'POST':
         receta.delete()
         messages.success(request, 'Receta médica eliminada exitosamente!')
         return redirect('web_receta_medica_list')
     return render(request, 'api_clinica/receta_medica/receta_medica_confirm_delete.html', {'receta': receta})
+
+
+# --- NUEVAS VISTAS CRUD PARA ENFERMERA (Basadas en Plantillas) ---
+def enfermera_list(request):
+    """
+        Lista todas las enfermeras y permite buscar por nombre, apellido, RUT o correo.
+        Permite filtrar por médico a cargo y estado activo.
+    """
+    enfermeras = Enfermera.objects.all()
+    query = request.GET.get('q')
+    medico_filter = request.GET.get('medico_a_cargo')
+    activo_filter = request.GET.get('activo')
+
+    if query:
+        enfermeras = enfermeras.filter(Q(nombre__icontains=query) | Q(apellido__icontains=query) | Q(rut__icontains=query) | Q(correo__icontains=query))
+
+    if medico_filter:
+        enfermeras = enfermeras.filter(medico_a_cargo__id=medico_filter)
+    
+    if activo_filter is not None:
+        enfermeras = enfermeras.filter(activo=(activo_filter == 'true'))
+
+    medicos = Medico.objects.all() # Para el filtro en la plantilla
+
+    return render(request, 'api_clinica/enfermera/enfermera_list.html', {
+        'enfermeras': enfermeras,
+        'query': query,
+        'medicos': medicos,
+        'selected_medico_a_cargo': medico_filter,
+        'selected_activo': activo_filter,
+    })
+
+def enfermera_create(request):
+    """
+        Permite crear una nueva enfermera.
+    """
+    if request.method == 'POST':
+        form = EnfermeraForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Enfermera creada exitosamente!')
+            return redirect('web_enfermera_list')
+    else:
+        form = EnfermeraForm()
+    return render(request, 'api_clinica/enfermera/enfermera_form.html', {'form': form, 'action': 'Crear'})
+
+def enfermera_update(request, pk):
+    """
+        Permite editar una enfermera existente.
+    """
+    enfermera = get_object_or_404(Enfermera, pk=pk)
+    if request.method == 'POST':
+        form = EnfermeraForm(request.POST, instance=enfermera)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Enfermera actualizada exitosamente!')
+            return redirect('web_enfermera_list')
+    else:
+        form = EnfermeraForm(instance=enfermera)
+    return render(request, 'api_clinica/enfermera/enfermera_form.html', {'form': form, 'action': 'Editar'})
+
+def enfermera_delete(request, pk):
+    """
+        Elimina una enfermera.
+    """
+    enfermera = get_object_or_404(Enfermera, pk=pk)
+    if request.method == 'POST':
+        enfermera.delete()
+        messages.success(request, 'Enfermera eliminada exitosamente!')
+        return redirect('web_enfermera_list')
+    return render(request, 'api_clinica/enfermera/enfermera_confirm_delete.html', {'enfermera': enfermera})
+# -----------------------------------------------------------------------------

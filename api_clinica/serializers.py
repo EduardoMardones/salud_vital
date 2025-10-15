@@ -1,6 +1,6 @@
 # api_clinica/serializers.py
 from rest_framework import serializers
-from .models import Especialidad, Medico, Paciente, ConsultaMedica, Tratamiento, Medicamento, RecetaMedica
+from .models import Especialidad, Medico, Paciente, ConsultaMedica, Tratamiento, Medicamento, RecetaMedica, Enfermera
 
 # Serializador para el modelo Especialidad
 class EspecialidadSerializer(serializers.ModelSerializer):
@@ -69,3 +69,22 @@ class RecetaMedicaSerializer(serializers.ModelSerializer):
         model = RecetaMedica
         fields = '__all__'
         # fields = ['id', 'tratamiento', 'tratamiento_id', 'medicamento', 'medicamento_nombre', 'dosis', 'frecuencia', 'duracion']
+
+class EnfermeraSerializer(serializers.ModelSerializer):
+    medico_a_cargo_nombre_completo = serializers.SerializerMethodField()
+    # Opcional: si quieres el ID del médico a cargo en la salida, pero ya está incluido en fields='__all__'
+    # medico_a_cargo_id = serializers.PrimaryKeyRelatedField(source='medico_a_cargo', read_only=True)
+
+    class Meta:
+        model = Enfermera
+        fields = '__all__'
+        # Si prefieres especificar los campos explícitamente:
+        # fields = [
+        #     'id', 'nombre', 'apellido', 'rut', 'correo', 'telefono', 'activo',
+        #     'medico_a_cargo', 'medico_a_cargo_nombre_completo'
+        # ]
+
+    def get_medico_a_cargo_nombre_completo(self, obj):
+        if obj.medico_a_cargo: # Verifica si hay un médico asignado
+            return f"{obj.medico_a_cargo.nombre} {obj.medico_a_cargo.apellido}"
+        return None # Retorna None si no hay un médico asignado

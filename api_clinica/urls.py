@@ -25,6 +25,9 @@ urlpatterns = [
     path('recetas/', views.RecetaMedicaListCreate.as_view(), name='recetamedica-list-create'), # Listar y crear recetas médicas
     path('recetas/<int:pk>/', views.RecetaMedicaRetrieveUpdateDestroy.as_view(), name='recetamedica-detail'), # Ver, actualizar y eliminar receta médica
 
+    path('enfermeras/', views.EnfermeraListCreate.as_view(), name='enfermera-list-create'), # Listar y crear enfermeras
+    path('enfermeras/<int:pk>/', views.EnfermeraRetrieveUpdateDestroy.as_view(), name='enfermera-detail'), # Ver, actualizar y eliminar enfermera
+
     # URLs para las vistas basadas en plantillas (HTML, CSS, Bootstrap) - CRUD completo
     path('web/especialidades/', views.especialidad_list, name='web_especialidad_list'), # Listar especialidades
     path('web/especialidades/crear/', views.especialidad_create, name='web_especialidad_create'), # Crear especialidad
@@ -60,6 +63,12 @@ urlpatterns = [
     path('web/recetas/crear/', views.receta_medica_create, name='web_receta_medica_create'), # Crear receta médica
     path('web/recetas/editar/<int:pk>/', views.receta_medica_update, name='web_receta_medica_update'), # Editar receta médica
     path('web/recetas/eliminar/<int:pk>/', views.receta_medica_delete, name='web_receta_medica_delete'), # Eliminar receta médica
+
+    path('web/enfermeras/', views.enfermera_list, name='web_enfermera_list'), # Listar enfermeras
+    path('web/enfermeras/crear/', views.enfermera_create, name='web_enfermera_create'), # Crear enfermera
+    path('web/enfermeras/editar/<int:pk>/', views.enfermera_update, name='web_enfermera_update'), # Editar enfermera
+    path('web/enfermeras/eliminar/<int:pk>/', views.enfermera_delete, name='web_enfermera_delete'), # Eliminar enfermera
+
 
     # URL para la página de inicio (dashboard o página principal)
     path('', views.home, name='home'),

@@ -88,3 +88,26 @@ class RecetaMedica(models.Model):
 
     def __str__(self):
         return f'Receta para {self.medicamento.nombre} en tratamiento {self.tratamiento.id}'
+    
+
+class Enfermera(models.Model):
+    nombre = models.CharField(max_length=100)
+    apellido = models.CharField(max_length=100)
+    rut = models.CharField(max_length=12, unique=True)
+    correo = models.EmailField(unique=True)
+    telefono = models.CharField(max_length=15, blank=True, null=True)
+    activo = models.BooleanField(default=True)
+    # Aquí la ForeignKey al modelo Medico
+    medico_a_cargo = models.ForeignKey(
+        'Medico', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, # Permite que una enfermera no tenga un médico asignado inicialmente
+        related_name='enfermeras_asignadas' # Nombre inverso para acceder desde Medico
+    )
+
+    def get__full__name(self):
+        return f'{self.nombre} {self.apellido}'
+
+    def __str__(self):
+        return f'{self.nombre} {self.apellido}'

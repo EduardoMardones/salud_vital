@@ -1,0 +1,107 @@
+{% extends 'api_clinica/base.html' %}
+
+{% block title %}Enfermeras{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold" style="color: #001f3f;">Listado de Enfermeras</h2>
+    <a href="{% url 'web_enfermera_create' %}" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> Crear Nueva Enfermera
+    </a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-center">
+            <div class="col-md-5">
+                <input type="text" name="q" class="form-control" placeholder="Buscar por nombre, apellido, RUT, correo..." value="{{ query|default_if_none:'' }}">
+            </div>
+            <div class="col-md-3">
+                <select name="medico_a_cargo" class="form-select">
+                    <option value="">Todos los Médicos</option>
+                    {% for medico in medicos %}
+                        <option value="{{ medico.id }}" {% if medico.id|stringformat:"i" == selected_medico_a_cargo %}selected{% endif %}>
+                            {{ medico.nombre }} {{ medico.apellido }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="activo" class="form-select">
+                    <option value="">Estado Activo</option>
+                    <option value="true" {% if selected_activo == 'true' %}selected{% endif %}>Activo</option>
+                    <option value="false" {% if selected_activo == 'false' %}selected{% endif %}>Inactivo</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary-custom w-100">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+            <div class="col-md-1">
+                <a href="{% url 'web_enfermera_list' %}" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if enfermeras %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>RUT</th>
+                <th>Correo</th>
+                <th>Teléfono</th>
+                <th>Médico a Cargo</th>
+                <th>Activo</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for enfermera in enfermeras %}
+            <tr>
+                <td>{{ enfermera.id }}</td>
+                <td>{{ enfermera.nombre }}</td>
+                <td>{{ enfermera.apellido }}</td>
+                <td>{{ enfermera.rut }}</td>
+                <td>{{ enfermera.correo }}</td>
+                <td>{{ enfermera.telefono|default:"N/A" }}</td>
+                <td>
+                    {% if enfermera.medico_a_cargo %}
+                        {{ enfermera.medico_a_cargo.nombre }} {{ enfermera.medico_a_cargo.apellido }}
+                    {% else %}
+                        <span class="text-muted">No Asignado</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if enfermera.activo %}
+                        <span class="badge bg-success">Sí</span>
+                    {% else %}
+                        <span class="badge bg-danger">No</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    <a href="{% url 'web_enfermera_update' enfermera.pk %}" class="btn btn-info btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                    <a href="{% url 'web_enfermera_delete' enfermera.pk %}" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-warning text-center" role="alert">
+    No se encontraron enfermeras. <a href="{% url 'web_enfermera_create' %}" class="alert-link">Crea una ahora</a>.
+</div>
+{% endif %}
+{% endblock %}

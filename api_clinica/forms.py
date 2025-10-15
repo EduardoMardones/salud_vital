@@ -1,6 +1,6 @@
 # api_clinica/forms.py
 from django import forms
-from .models import Especialidad, Medico, Paciente, ConsultaMedica, Tratamiento, Medicamento, RecetaMedica
+from .models import Especialidad, Medico, Paciente, ConsultaMedica, Tratamiento, Medicamento, RecetaMedica, Enfermera
 
 """
     Definición de formularios Django para cada modelo.
@@ -171,4 +171,31 @@ class RecetaMedicaForm(forms.ModelForm):
             'dosis': forms.TextInput(attrs={'class': 'form-control'}),
             'frecuencia': forms.TextInput(attrs={'class': 'form-control'}),
             'duracion': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+class EnfermeraForm(forms.ModelForm):
+    """
+        Formulario para el modelo Enfermera.
+        Permite crear y editar información de enfermeras.
+    """
+    class Meta:
+        model = Enfermera
+        fields = ['nombre', 'apellido', 'rut', 'correo', 'telefono', 'activo', 'medico_a_cargo']
+        labels = {
+            'nombre': 'Nombre',
+            'apellido': 'Apellido',
+            'rut': 'RUT',
+            'correo': 'Correo Electrónico',
+            'telefono': 'Teléfono',
+            'activo': 'Activo',
+            'medico_a_cargo': 'Médico a Cargo',
+        }
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'apellido': forms.TextInput(attrs={'class': 'form-control'}),
+            'rut': forms.TextInput(attrs={'class': 'form-control'}),
+            'correo': forms.EmailInput(attrs={'class': 'form-control'}),
+            'telefono': forms.TextInput(attrs={'class': 'form-control'}),
+            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'medico_a_cargo': forms.Select(attrs={'class': 'form-control'}), # Selector para ForeignKey
         }
