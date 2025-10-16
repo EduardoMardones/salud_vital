@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import Q # Para filtros y búsquedas
 from rest_framework import generics # Para las vistas de la API REST
+from rest_framework import viewsets
+
 
 # Importar todos los modelos, incluyendo Enfermera
 from .models import Especialidad, Medico, Paciente, ConsultaMedica, Tratamiento, Medicamento, RecetaMedica, Enfermera
@@ -11,6 +13,73 @@ from .serializers import EspecialidadSerializer, MedicoSerializer, PacienteSeria
 # Importar todos los formularios, incluyendo EnfermeraForm (¡recuerda crear este!)
 from .forms import EspecialidadForm, MedicoForm, PacienteForm, ConsultaMedicaForm, TratamientoForm, \
     MedicamentoForm, RecetaMedicaForm, EnfermeraForm
+
+
+
+
+# ViewSet para Especialidad
+class EspecialidadViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint que permite a las especialidades ser vistas o editadas.
+    """
+    queryset = Especialidad.objects.all()
+    serializer_class = EspecialidadSerializer
+
+# ViewSet para Medico
+class MedicoViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint que permite a los médicos ser vistos o editados.
+    """
+    queryset = Medico.objects.all()
+    serializer_class = MedicoSerializer
+
+# ViewSet para Paciente
+class PacienteViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint que permite a los pacientes ser vistos o editados.
+    """
+    queryset = Paciente.objects.all()
+    serializer_class = PacienteSerializer
+
+# ViewSet para ConsultaMedica
+class ConsultaMedicaViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint que permite a las consultas médicas ser vistas o editadas.
+    """
+    queryset = ConsultaMedica.objects.all()
+    serializer_class = ConsultaMedicaSerializer
+
+# ViewSet para Tratamiento
+class TratamientoViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint que permite a los tratamientos ser vistos o editados.
+    """
+    queryset = Tratamiento.objects.all()
+    serializer_class = TratamientoSerializer
+
+# ViewSet para Medicamento
+class MedicamentoViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint que permite a los medicamentos ser vistos o editados.
+    """
+    queryset = Medicamento.objects.all()
+    serializer_class = MedicamentoSerializer
+
+# ViewSet para RecetaMedica
+class RecetaMedicaViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint que permite a las recetas médicas ser vistas o editadas.
+    """
+    queryset = RecetaMedica.objects.all()
+    serializer_class = RecetaMedicaSerializer
+
+# ViewSet para Enfermera
+class EnfermeraViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint que permite a las enfermeras ser vistas o editadas.
+    """
+    queryset = Enfermera.objects.all()
+    serializer_class = EnfermeraSerializer
 
 """
     Este archivo contiene todas las vistas para la aplicación 'api_clinica'.
@@ -655,3 +724,6 @@ def enfermera_delete(request, pk):
         return redirect('web_enfermera_list')
     return render(request, 'api_clinica/enfermera/enfermera_confirm_delete.html', {'enfermera': enfermera})
 # -----------------------------------------------------------------------------
+
+def inicio(request):
+    return render(request, "api_clinica/home.html")

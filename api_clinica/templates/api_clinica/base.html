@@ -23,6 +23,43 @@
         .navbar-custom .nav-link:hover {
             color: #e0e0e0; /* Blanco más claro al pasar el ratón */
         }
+        /* Estilos para el efecto de subrayado blanco */
+        .navbar-custom .nav-item .nav-link {
+            position: relative; /* Necesario para posicionar el pseudo-elemento */
+            padding-bottom: 5px; /* Espacio para la línea */
+        }
+
+        .navbar-custom .nav-item .nav-link::after {
+            content: ''; /* Contenido vacío para el pseudo-elemento */
+            position: absolute;
+            left: 0;
+            bottom: 0; /* Posicionar en la parte inferior del enlace */
+            width: 0; /* Ancho inicial 0 */
+            height: 2px; /* Grosor de la línea */
+            background-color: #ffffff; /* Color blanco */
+            transition: width 0.3s ease-in-out; /* Transición suave para el ancho */
+        }
+
+        .navbar-custom .nav-item .nav-link:hover::after {
+            width: 100%; /* Ancho completo al hacer hover */
+        }
+        /* Fin de estilos para el efecto de subrayado blanco */
+
+        /* Estilos para el dropdown-item */
+        .navbar-custom .dropdown-menu {
+            background-color: #001f3f; /* Mismo color de fondo que el navbar */
+            border: none;
+        }
+
+        .navbar-custom .dropdown-item {
+            color: #ffffff; /* Color de texto blanco para los ítems */
+        }
+
+        .navbar-custom .dropdown-item:hover {
+            background-color: #003366; /* Un azul más oscuro al pasar el ratón */
+            color: #ffffff;
+        }
+
         .footer {
             background-color: #001f3f;
             color: #ffffff;
@@ -57,7 +94,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'home' %}">Clínica Médica</a>
+            <a class="navbar-brand" href="{% url 'home' %}">Salud Vital</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -89,8 +126,17 @@
                     </li>
                 </ul>
 
-                {# Nuevo ul para alinear a la derecha #}
+                {# Nuevo ul para alinear a la derecha, incluyendo el nuevo dropdown #}
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0"> {# ms-auto empuja estos elementos a la derecha #}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownServices" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Services
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownServices">
+                            <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a></li>
+                            <li><a class="dropdown-item" href="/api/">API</a></li> {# ¡CAMBIADO! Apunta a la URL de la API #}
+                        </ul>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'swagger-ui' %}">
                             <i class="bi bi-file-earmark-text"></i> Docs

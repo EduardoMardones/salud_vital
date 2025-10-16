@@ -14,7 +14,7 @@ class Medico(models.Model):
     correo = models.EmailField(unique=True)
     telefono = models.CharField(max_length=15, blank=True, null=True)
     activo = models.BooleanField(default=True)
-    especialidad = models.ForeignKey(Especialidad, on_delete=models.SET_NULL, null=True, related_name='medicos')
+    especialidad = models.ForeignKey(Especialidad, on_delete=models.CASCADE,  related_name='medicos')
 
     def get__full__name(self):
         return f'{self.nombre} {self.apellido}'
@@ -100,8 +100,7 @@ class Enfermera(models.Model):
     # Aquí la ForeignKey al modelo Medico
     medico_a_cargo = models.ForeignKey(
         'Medico', 
-        on_delete=models.SET_NULL, 
-        null=True, 
+        on_delete=models.CASCADE, 
         blank=True, # Permite que una enfermera no tenga un médico asignado inicialmente
         related_name='enfermeras_asignadas' # Nombre inverso para acceder desde Medico
     )

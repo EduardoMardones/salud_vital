@@ -1,8 +1,31 @@
 # api_clinica/urls.py
-from django.urls import path
+from django.urls import path, include
 from . import views
+from rest_framework.routers import DefaultRouter
+from .views import (
+    EspecialidadViewSet,
+    MedicoViewSet,
+    PacienteViewSet,
+    ConsultaMedicaViewSet,
+    TratamientoViewSet,
+    MedicamentoViewSet,
+    RecetaMedicaViewSet,
+    EnfermeraViewSet
+)
+
+# Crea un router y registra nuestros viewsets con él.
+router = DefaultRouter()
+router.register(r'especialidades', EspecialidadViewSet)
+router.register(r'medicos', MedicoViewSet)
+router.register(r'pacientes', PacienteViewSet)
+router.register(r'consultas', ConsultaMedicaViewSet)
+router.register(r'tratamientos', TratamientoViewSet)
+router.register(r'medicamentos', MedicamentoViewSet)
+router.register(r'recetas', RecetaMedicaViewSet)
+router.register(r'enfermeras', EnfermeraViewSet)
 
 urlpatterns = [
+    path('', include(router.urls)),
     # URLs para las vistas de la API (DRF)
     path('especialidades/', views.EspecialidadListCreate.as_view(), name='especialidad-list-create'), # Listar y crear especialidades
     path('especialidades/<int:pk>/', views.EspecialidadRetrieveUpdateDestroy.as_view(), name='especialidad-detail'), # Ver, actualizar y eliminar especialidad
@@ -71,5 +94,5 @@ urlpatterns = [
 
 
     # URL para la página de inicio (dashboard o página principal)
-    path('', views.home, name='home'),
+
 ]

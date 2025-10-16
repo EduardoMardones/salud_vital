@@ -2,6 +2,7 @@
 from rest_framework import serializers
 from .models import Especialidad, Medico, Paciente, ConsultaMedica, Tratamiento, Medicamento, RecetaMedica, Enfermera
 
+
 # Serializador para el modelo Especialidad
 class EspecialidadSerializer(serializers.ModelSerializer):
     class Meta:
